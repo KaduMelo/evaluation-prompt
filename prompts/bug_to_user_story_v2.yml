@@ -17,7 +17,7 @@ bug_to_user_story_v2:
 
     2. COMPLEXIDADE MÉDIA (Com passos, logs ou cenários específicos):
        - Mesma estrutura da Simples (Estória + Critérios de Aceitação).
-       - Adicione uma seção extra no final (ex: "Contexto Técnico:", "Contexto de Segurança:" ou "Contexto do Bug:") com as informações técnicas e logs.
+       - Adicione, ao final, TODAS as seções extras que se apliquem (pode ser mais de uma) para não perder nenhuma informação do relato: "Contexto Técnico:", "Contexto de Segurança:", "Contexto do Bug:", "Exemplo de Cálculo:" (quando houver números/fórmulas) ou "Critérios de Prevenção:" (quando houver concorrência/borda a evitar no futuro).
 
     3. COMPLEXIDADE ALTA (Múltiplas falhas, alto impacto, sistêmico):
        - Inicie com a estória geral ("Como um...").
@@ -27,6 +27,17 @@ bug_to_user_story_v2:
          === CRITÉRIOS TÉCNICOS ===
          === CONTEXTO DO BUG ===
          === TASKS TÉCNICAS SUGERIDAS ===
+
+    # REGRAS DE FIDELIDADE E COBERTURA (MAXIMIZAR RECALL SEM INVENTAR DADOS)
+    Antes de responder, extraia mentalmente cada fato do relato (números, IDs, nomes de campos/endpoints, mensagens de log, passos, condições de borda) e garanta que cada um vire um critério de aceitação ou uma linha de contexto técnico — nunca resuma ou descarte um dado concreto do relato.
+    Além disso, como QA sênior, complemente com os padrões implícitos de qualidade abaixo SEMPRE que forem coerentes com o relato (sem inventar números, nomes ou sistemas que não estejam nele):
+    - Ação em UI: inclua um critério de confirmação visual/feedback ao usuário.
+    - Métrica, contador ou dashboard: inclua um critério de que o valor deve refletir o dado real/atualizado.
+    - Diferença entre navegadores/dispositivos/plataformas: inclua um critério de paridade/consistência entre eles.
+    - Validação de formulário: inclua um critério de que a mensagem de erro deve orientar como corrigir.
+    - Cálculo com valores numéricos no relato (ex: preços, percentuais): adicione a seção "Exemplo de Cálculo:" reproduzindo os MESMOS números do relato e o resultado correto.
+    - Concorrência, race condition ou disputa por recurso limitado: adicione critérios de prevenção (ex: reserva temporária, lock, aviso ao usuário) além do critério que corrige o sintoma relatado.
+    Nunca sacrifique a precisão por cobertura: toda informação adicionada deve ser consequência direta e razoável do que foi relatado.
 
     # EDGE CASES
     - Relato vago (sem comportamento ou componente identificável): gere a User Story
@@ -80,6 +91,42 @@ bug_to_user_story_v2:
     - Endpoint está retornando HTTP 500
     - Gateway: [nome do gateway de pagamento]
     - Logs indicam falha no processamento do webhook
+    [/SAÍDA]
+
+    [ENTRADA]
+    ### Relato de bug
+    Pipeline de vendas calcula valor total errado quando há desconto.
+
+    Cenário:
+    - Produto A: R$ 1.000
+    - Produto B: R$ 500
+    - Desconto: 10%
+    - Valor esperado: R$ 1.350
+    - Valor mostrado: R$ 1.400
+
+    O sistema aplica desconto só no primeiro produto.
+    [/ENTRADA]
+    [SAÍDA]
+    ### User Story esperada
+    Como um vendedor gerenciando oportunidades no pipeline, eu quero que o valor total seja calculado corretamente quando aplico descontos, para que eu possa apresentar propostas precisas aos clientes.
+
+    Critérios de Aceitação:
+    - Dado que tenho uma oportunidade com múltiplos produtos
+    - Quando aplico um desconto percentual
+    - Então o desconto deve ser aplicado no valor total de todos os produtos
+    - E o valor final deve ser: (soma dos produtos) × (1 - desconto%)
+    - E o detalhamento deve mostrar: subtotal, desconto e total
+
+    Exemplo de Cálculo:
+    - Produto A: R$ 1.000
+    - Produto B: R$ 500
+    - Subtotal: R$ 1.500
+    - Desconto 10%: -R$ 150
+    - Total: R$ 1.350
+
+    Contexto Técnico:
+    - Bug atual: desconto sendo aplicado apenas no primeiro produto
+    - Resultado incorreto: R$ 1.400 (deveria ser R$ 1.350)
     [/SAÍDA]
 
     [ENTRADA]
